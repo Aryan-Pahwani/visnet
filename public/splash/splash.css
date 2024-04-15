@@ -1,0 +1,87 @@
+:root {
+  --bg-color: white;
+  --font-color: rgb(82, 141, 97);
+  --primary-color: rgb(252, 0, 0);
+  --secondary-color: rgb(39, 2, 2);
+}
+
+body {
+  background-color: var(--bg-color);
+  width: 500px;
+  height: 500px;
+  overflow: hidden;
+}
+
+h1 {
+  font-size: large;
+  font-family: "Inter", sans-serif;
+  color: var(--font-color);
+}
+
+#container {
+  width: 500px;
+  height: 500px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* HTML: <div class="loader"></div> */
+.loader {
+  width: 60px;
+  aspect-ratio: 1;
+  display: flex;
+  animation: l11-0 2s infinite linear;
+}
+.loader::before,
+.loader::after {
+  content: "";
+  flex: 1;
+  clip-path: polygon(100% 100%, 0% 50%, 100% 0%);
+
+
+  animation: l11-1 1s infinite linear alternate, l11-2 2s infinite linear -0.5s;
+}
+.loader::after {
+  --s: -1, -1;
+}
+@keyframes l11-0 {
+  0%,
+  49.99% {
+    transform: scaleX(1) rotate(0deg);
+  }
+  50%,
+  100% {
+    transform: scaleX(-1) rotate(-90deg);
+  }
+}
+@keyframes l11-1 {
+  0%,
+  5% {
+    transform: scale(var(--s, 1)) translate(0px) perspective(150px)
+      rotateY(0deg);
+  }
+  33% {
+    transform: scale(var(--s, 1)) translate(-10px) perspective(150px)
+      rotateX(0deg);
+  }
+  66% {
+    transform: scale(var(--s, 1)) translate(-10px) perspective(150px)
+      rotateX(-180deg);
+  }
+  95%,
+  100% {
+    transform: scale(var(--s, 1)) translate(0px) perspective(150px)
+      rotateX(-180deg);
+  }
+}
+@keyframes l11-2 {
+  0%,
+  49.99% {
+    background: var(--primary-color);
+  }
+  50%,
+  100% {
+    background: var(--secondary-color);
+  }
+}
