@@ -1,0 +1,3 @@
+serve=yarn electron:serve
+build=yarn electron:build
+start=yarn electron:start

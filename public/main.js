@@ -1,4 +1,4 @@
-const { app, BrowserWindow } = require("electron");
+const { app, BrowserWindow, Menu, ipcMain } = require("electron");
 const path = require("node:path");
 
 require("@electron/remote/main").initialize();
@@ -20,9 +20,9 @@ const createWindow = () => {
     width: 800,
     height: 600,
     show: false,
-    frame: false,
     webPreferences: {
       enableRemoteModule: true,
+      preload: path.join(__dirname, 'preload.js') 
     },
   });
 
@@ -36,4 +36,15 @@ const createWindow = () => {
 app.on('ready', () => {
   createSplashScreen();
   createWindow();
+});
+
+
+ipcMain.on('show-context-menu', (event) => {
+  const contextMenu = Menu.buildFromTemplate([
+    { label: 'Menu Item 1', click: () => { event.sender.send('context-menu-command', 'menu-item-1'); } },
+    // ... other menu items ...
+  ]);
+
+  const win = BrowserWindow.fromWebContents(event.sender);
+  contextMenu.popup(win);
 });
