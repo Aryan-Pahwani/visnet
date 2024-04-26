@@ -3,11 +3,13 @@ import Block from "./components/Block";
 
 
 function App() {
+  const [mouse_position, setMousePosition] = useState({ x: 0, y: 0 });
 
   const [connections, setConnections] = useState([]);
   const [connect_mode, setConnectMode] = useState(false);
 
-  const [my_block, setMyBlock] = useState(null);
+  const [blocks, setBlocks] = useState([]);
+  const [selected_block, selectBlock] = useState(null);
 
   const [background_color, setBackgroundColor] = useState("transparent");
 
@@ -24,17 +26,25 @@ function App() {
 
 const contextMenuHandler = (event) => {
   event.preventDefault();
-  window.electron.send('show-context-menu');
+  // window.electron.send('show-context-menu');
+  const x = mouse_position.x;
+  const y = mouse_position.y;
+  spawnNewBlock(x, y);
 }
 
-window.electron.receive('context-menu-command', (event, command) => {
-  // Handle the command (e.g., 'menu-item-1') here
-  setContextMenu();
-});
+const spawnNewBlock = (x, y) => {
+  const new_block = { top: y-50, left: x-50 };
+  setBlocks([...blocks, new_block]);
+};
+
+// window.electron.receive('context-menu-command', (event, command) => {
+//   // Handle the command (e.g., 'menu-item-1') here
+//   spawnNewBlock();
+// });
 
 
 
-  // Draw Lines
+
 
   const drawLines = () => {
 
@@ -77,23 +87,19 @@ window.electron.receive('context-menu-command', (event, command) => {
       context.moveTo(x1, y1);
       context.lineTo(x2, y2);
       context.stroke();
-
-
     });};
   
-    // Clears current Canvas context
-    const clearLines = () => {
+  const clearLines = () => {
 
-      // Get Variables
-    
-      const canvas = document.querySelector("canvas");
-      const context = canvas.getContext("2d");
+    // Get Variables
+  
+    const canvas = document.querySelector("canvas");
+    const context = canvas.getContext("2d");
 
-      context.clearRect(0, 0, canvas.width, canvas.height);
+    context.clearRect(0, 0, canvas.width, canvas.height);
 
-    }
+  }
 
-  // Handles new Connection
   
   const handleNewConnection = (input, output) => {
     const new_connection = { input, output };
@@ -110,8 +116,6 @@ window.electron.receive('context-menu-command', (event, command) => {
   };
 
 
-  // MOUSE DOWN HANDLER //
-
   const mouseDownHandler = (event) => {
     
     const clicked_on_block = event.target.classList.contains("Block");
@@ -126,7 +130,7 @@ window.electron.receive('context-menu-command', (event, command) => {
       else if (event.button === 1) {
       
         setConnectMode(true);
-        setMyBlock(event.target.id);
+        selectBlock(event.target.id);
 
         setBackgroundColor("rgba(235, 235, 235, 0.8)");
       
@@ -145,7 +149,6 @@ window.electron.receive('context-menu-command', (event, command) => {
     }
   };
 
-  // MOUSE UP HANDLER //
 
   const mouseUpHandler = (event) => {
 
@@ -168,9 +171,9 @@ window.electron.receive('context-menu-command', (event, command) => {
 
         }
 
-        if (event.target.id !== my_block && connect_mode) {
+        if (event.target.id !== selected_block && connect_mode) {
 
-          handleNewConnection(my_block, event.target.id);
+          handleNewConnection(selected_block, event.target.id);
           drawLines();
         }
 
@@ -211,10 +214,23 @@ window.electron.receive('context-menu-command', (event, command) => {
 
     };
 
+    const updateMousePosition = (event) => {
+      setMousePosition({
+        x: event.clientX,
+        y: event.clientY
+      });
+    };
+
     window.addEventListener("resize", updateCanvasSize);
+    document.addEventListener("mousemove", updateMousePosition);
+
     updateCanvasSize(); // Initial call to set the size
 
-    return () => window.removeEventListener("resize", updateCanvasSize);
+
+    return () => {
+      window.removeEventListener("resize", updateCanvasSize);
+      document.removeEventListener("mousemove", updateMousePosition);
+    };
   }, []);
 
 
@@ -242,11 +258,11 @@ window.electron.receive('context-menu-command', (event, command) => {
           left: 0,
         }}
       ></canvas>
+      {blocks.map((block, index) => (
+        <Block key={index} id={"Block"+index} top={block.top} left={block.left}/>
+      ))}
 
-      <Block id="Block1" />
-      <Block id="Block2" />
-      <Block id="Block3" />
-
+        
     </div>
   );
 };

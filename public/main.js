@@ -41,7 +41,7 @@ app.on('ready', () => {
 
 ipcMain.on('show-context-menu', (event) => {
   const contextMenu = Menu.buildFromTemplate([
-    { label: 'Menu Item 1', click: () => { event.sender.send('context-menu-command', 'menu-item-1'); } },
+    { label: 'New Block', click: () => { event.sender.send('context-menu-command', 'spawn-new-block'); } },
     // ... other menu items ...
   ]);
 
