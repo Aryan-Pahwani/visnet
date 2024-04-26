@@ -24,8 +24,10 @@ const createWindow = () => {
       enableRemoteModule: true,
       preload: path.join(__dirname, 'preload.js') 
     },
+    
   });
 
+  
   win.loadURL("http://localhost:3000");
   win.once('ready-to-show', () => {
     splashScreen.destroy() // Destroy the splash screen
@@ -39,12 +41,16 @@ app.on('ready', () => {
 });
 
 
-ipcMain.on('show-context-menu', (event) => {
-  const contextMenu = Menu.buildFromTemplate([
-    { label: 'New Block', click: () => { event.sender.send('context-menu-command', 'spawn-new-block'); } },
-    // ... other menu items ...
-  ]);
+// ipcMain.on('show-context-menu', (event) => {
+//   const contextMenu = Menu.buildFromTemplate([
+//     { label: 'New Block', click: () => { event.sender.send('context-menu-command', 'spawn-new-block'); } },
+//     // ... other menu items ...
+//   ]);
 
-  const win = BrowserWindow.fromWebContents(event.sender);
-  contextMenu.popup(win);
-});
+//   const win = BrowserWindow.fromWebContents(event.sender);
+//   contextMenu.popup(win);
+// });
+
+// DISABLE SECURITY WARNING
+process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true';
+
