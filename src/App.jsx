@@ -18,7 +18,13 @@ function App() {
   const initial_context_menu = {
     show: false,
     x: 0,
-    y: 0
+    y: 0,
+    items: [
+      {
+        itemName: "",
+        itemFunction: null
+      }
+    ]
   }
 
   const [context_menu, setContextMenu] = useState(initial_context_menu);
@@ -28,14 +34,17 @@ function App() {
 const contextMenuHandler = (event) => {
   event.preventDefault();
   // window.electron.send('show-context-menu');
+  console.log(event.target);
   const mouse_position_x = mouse_position.x;
   const mouse_position_y= mouse_position.y;
-  setContextMenu({show: true, x: mouse_position_x, y: mouse_position_y});
+  setContextMenu({show: true, x: mouse_position_x, y: mouse_position_y, items: [{itemName: "Add new Block", itemFunction: spawnNewBlock}]});
 
 }
 
 const spawnNewBlock = (x, y) => {
+  console.log("Added new block!");
   const new_block = { top: y-50, left: x-50 };
+  
   setBlocks([...blocks, new_block]);
 };
 
@@ -256,12 +265,13 @@ const spawnNewBlock = (x, y) => {
       onMouseUp={mouseUpHandler}
       
     >
-      {context_menu.show && <ContextMenu x={context_menu.x} y={context_menu.y}/>}
+      {context_menu.show && <ContextMenu x={context_menu.x} y={context_menu.y} items={context_menu.items}/>}
       <canvas
         style={{
           position: "absolute",
           top: 0,
           left: 0,
+          zIndex: -1
         }}
       ></canvas>
       {blocks.map((block, index) => (
