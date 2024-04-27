@@ -5,7 +5,15 @@ const ContextMenu = ({ x,  y }) => {
 
 
   return (
-    <div>Context Menu</div>
+    <div className="ContextMenu" style={{transform: `translate(${x}px, ${y}px)`, position: 'absolute', zindex: 1}}>
+
+    <ul>
+      <li><div></div></li>
+      <li><div></div></li>
+      <li><div></div></li>
+    </ul>
+
+    </div>
   );
 };
 

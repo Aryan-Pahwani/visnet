@@ -1,5 +1,6 @@
 import React, { useRef, useState, useEffect } from "react";
 import Block from "./components/Block";
+import ContextMenu from "./components/ContextMenu";
 
 
 function App() {
@@ -27,9 +28,10 @@ function App() {
 const contextMenuHandler = (event) => {
   event.preventDefault();
   // window.electron.send('show-context-menu');
-  const x = mouse_position.x;
-  const y = mouse_position.y;
-  spawnNewBlock(x, y);
+  const mouse_position_x = mouse_position.x;
+  const mouse_position_y= mouse_position.y;
+  setContextMenu({show: true, x: mouse_position_x, y: mouse_position_y});
+
 }
 
 const spawnNewBlock = (x, y) => {
@@ -89,16 +91,16 @@ const spawnNewBlock = (x, y) => {
       context.stroke();
     });};
   
-  const clearLines = () => {
+  // const clearLines = () => {
 
-    // Get Variables
+  //   // Get Variables
   
-    const canvas = document.querySelector("canvas");
-    const context = canvas.getContext("2d");
+  //   const canvas = document.querySelector("canvas");
+  //   const context = canvas.getContext("2d");
 
-    context.clearRect(0, 0, canvas.width, canvas.height);
+  //   context.clearRect(0, 0, canvas.width, canvas.height);
 
-  }
+  // }
 
   
   const handleNewConnection = (input, output) => {
@@ -145,8 +147,8 @@ const spawnNewBlock = (x, y) => {
       }
 
       drawLines();
-
     }
+    closeContextMenu();
   };
 
 
@@ -194,8 +196,9 @@ const spawnNewBlock = (x, y) => {
     
   };
 
-
-
+  const closeContextMenu = (event) => {
+    setContextMenu(initial_context_menu);
+  };
 
 
 
@@ -237,6 +240,8 @@ const spawnNewBlock = (x, y) => {
 
 
   return (
+    <>
+    
     <div
       onContextMenu={contextMenuHandler}
       ref={container_ref}
@@ -251,6 +256,7 @@ const spawnNewBlock = (x, y) => {
       onMouseUp={mouseUpHandler}
       
     >
+      {context_menu.show && <ContextMenu x={context_menu.x} y={context_menu.y}/>}
       <canvas
         style={{
           position: "absolute",
@@ -261,9 +267,9 @@ const spawnNewBlock = (x, y) => {
       {blocks.map((block, index) => (
         <Block key={index} id={"Block"+index} top={block.top} left={block.left}/>
       ))}
-
         
     </div>
+    </>
   );
 };
 
