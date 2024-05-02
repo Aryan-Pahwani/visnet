@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect } from "react";
 import Block from "./components/Block";
 import ContextMenu from "./components/ContextMenu";
-
+import context_data from './data/context-menu.json';
 
 function App() {
   const [mouse_position, setMousePosition] = useState({ x: 0, y: 0 });
@@ -21,8 +21,9 @@ function App() {
     y: 0,
     items: [
       {
-        itemName: "",
-        itemFunction: null
+        name: "", 
+        func: function () {}, 
+        enabled: false
       }
     ]
   }
@@ -30,20 +31,35 @@ function App() {
   const [context_menu, setContextMenu] = useState(initial_context_menu);
 
 
+  const contextMenuAsk = (class_name) => {
+    const class_map = {
+      "container": context_data.container,
+      "Block": context_data.block
+    }
+  
+    const function_map = {
+      "spawnNewBlock": spawnNewBlock
+    }
+    const items = JSON.parse(JSON.stringify(class_map[class_name]));
+    items.forEach((item) => {item.func = function_map[item.func]})
+
+    return items
+  }
+  
+
 
 const contextMenuHandler = (event) => {
   event.preventDefault();
-  // window.electron.send('show-context-menu');
-  console.log(event.target);
   const mouse_position_x = mouse_position.x;
   const mouse_position_y= mouse_position.y;
-  setContextMenu({show: true, x: mouse_position_x, y: mouse_position_y, items: [{itemName: "Add new Block", itemFunction: spawnNewBlock}]});
-
+  setContextMenu({show: true, x: mouse_position_x, y: mouse_position_y, items: contextMenuAsk(event.target.className.split(" ")[0])});
 }
 
-const spawnNewBlock = (x, y) => {
-  console.log("Added new block!");
-  const new_block = { top: y-50, left: x-50 };
+const spawnNewBlock = () => {
+  const mouse_position_x = mouse_position.x;
+  const mouse_position_y= mouse_position.y;
+
+  const new_block = { x: mouse_position_x-50, y: mouse_position_y-50 };
   
   setBlocks([...blocks, new_block]);
 };
@@ -54,7 +70,9 @@ const spawnNewBlock = (x, y) => {
 // });
 
 
-
+  const tempfunc = () => {
+    console.log("chinga chunga, sab chunga?");
+  }
 
 
   const drawLines = () => {
@@ -68,8 +86,7 @@ const spawnNewBlock = (x, y) => {
     // Set Context Settings
 
     context.clearRect(0, 0, canvas.width, canvas.height);
-    context.strokeStyle = "green";
-    context.lineWidth = 1;
+
 
     // Draws lines for every connection
 
@@ -86,18 +103,59 @@ const spawnNewBlock = (x, y) => {
 
       // Get's Co-ordinates
 
-      const x1 = input_rectangle.left + input_rectangle.width / 2 - canvas.offsetLeft;
-      const y1 = input_rectangle.top + input_rectangle.height / 2 - canvas.offsetTop;
+      var x1 = (input_rectangle.left + input_rectangle.width/2) > (output_rectangle.left + output_rectangle.width/2) ? input_rectangle.left - canvas.offsetLeft : input_rectangle.right - canvas.offsetLeft;
+      var y1 = input_rectangle.top + input_rectangle.height/2 - canvas.offsetTop;
 
-      const x2 = output_rectangle.left + output_rectangle.width / 2 - canvas.offsetLeft;
-      const y2 = output_rectangle.top + output_rectangle.height / 2 - canvas.offsetTop;
+      var x2 = (input_rectangle.left + input_rectangle.width/2) > (output_rectangle.left + output_rectangle.width/2) ? output_rectangle.right - canvas.offsetLeft : output_rectangle.left - canvas.offsetLeft;
+      var y2 = output_rectangle.top + output_rectangle.height/2 - canvas.offsetTop;
+    
 
-      // Moves
 
+      var angle = Math.atan2(y2-y1,x2-x1);
+
+      var head_length = 10;
+      // Line
       context.beginPath();
+      if (angle*180/Math.PI > 45 && angle*180/Math.PI < 135){
+        x1 = input_rectangle.left + input_rectangle.width/2-canvas.offsetLeft;
+        y1 = input_rectangle.bottom - canvas.offsetTop;
+        x2 = output_rectangle.left + output_rectangle.width/2-canvas.offsetLeft;
+        y2 = output_rectangle.top-canvas.offsetTop;
+      }
+      else if (angle*180/Math.PI > -135 && angle*180/Math.PI < -45) {
+        x1 = input_rectangle.left + input_rectangle.width/2-canvas.offsetLeft;
+        y1 = input_rectangle.top - canvas.offsetTop;
+        x2 = output_rectangle.left + output_rectangle.width/2-canvas.offsetLeft;
+        y2 = output_rectangle.bottom-canvas.offsetTop;
+      }
       context.moveTo(x1, y1);
       context.lineTo(x2, y2);
+
+      context.lineWidth = 3;
+      context.strokeStyle = "purple";
+      context.globalAlpha  = 0.6;
+      context.fillStyle = "transparent";
+
       context.stroke();
+
+      var angle = Math.atan2(y2-y1,x2-x1);
+
+      //Arrow
+      context.beginPath();
+      context.globalAlpha = 1;
+      context.moveTo(x2, y2);
+      context.lineTo(x2-head_length*Math.cos(angle-Math.PI/7),y2-head_length*Math.sin(angle-Math.PI/7));
+      
+      //path from the side point of the arrow, to the other side point
+      context.lineTo(x2-head_length*Math.cos(angle+Math.PI/7),y2-head_length*Math.sin(angle+Math.PI/7));
+      
+      //path from the side point back to the tip of the arrow, and then again to the opposite side point
+      context.lineTo(x2, y2);
+      context.lineTo(x2-head_length*Math.cos(angle-Math.PI/7),y2-head_length*Math.sin(angle-Math.PI/7));
+      context.stroke();
+      
+      context.fillStyle = "purple";
+      context.fill();
     });};
   
   // const clearLines = () => {
@@ -122,13 +180,14 @@ const spawnNewBlock = (x, y) => {
     );
 
     if (!does_connection_already_exist) {
+
       setConnections((prev_connections) => [...prev_connections, new_connection]);
     }
+
   };
 
 
   const mouseDownHandler = (event) => {
-    
     const clicked_on_block = event.target.classList.contains("Block");
     if (clicked_on_block) {
 
@@ -150,42 +209,43 @@ const spawnNewBlock = (x, y) => {
 
       // Left Click
       else if (event.button === 0) {
-
         setBackgroundColor("rgba(235, 235, 235, 0.8)");
-      
+        // For Context Menu
+
       }
 
-      drawLines();
     }
-    closeContextMenu();
+    drawLines();
+
   };
 
 
   const mouseUpHandler = (event) => {
 
-    const clicked_on_block = event.target.classList.contains("Block");
-    if (clicked_on_block) {
+    const classList = event.target.classList;
+    
 
       // Right Click
       if (event.button === 2) {
-        
+        if (classList.contains("Block")) {
+
+        }
       }
 
 
       // Middle Click
       if (event.button === 1) {
+        if (classList.contains("Block")) {
+          if (connect_mode) {
 
-
-        if (connect_mode) {
-
-          setConnectMode(false);
-
-        }
-
-        if (event.target.id !== selected_block && connect_mode) {
-
-          handleNewConnection(selected_block, event.target.id);
-          drawLines();
+            setConnectMode(false);
+  
+          }
+  
+          if (event.target.id !== selected_block && connect_mode) {
+  
+            handleNewConnection(selected_block, event.target.id);
+          }
         }
 
       }
@@ -193,13 +253,15 @@ const spawnNewBlock = (x, y) => {
 
       // Left Click
       if (event.button === 0) {
-
-
-
+        if (classList.contains("Block")) {
         }
 
+      } 
 
-    } 
+      if (context_menu.show == true) {
+        closeContextMenu();
+      }
+
     drawLines();
     setBackgroundColor("transparent");
     
@@ -255,6 +317,7 @@ const spawnNewBlock = (x, y) => {
       onContextMenu={contextMenuHandler}
       ref={container_ref}
       id="container"
+      className="container"
       style={{
         position: "relative",
         width: "100vw",
@@ -275,7 +338,7 @@ const spawnNewBlock = (x, y) => {
         }}
       ></canvas>
       {blocks.map((block, index) => (
-        <Block key={index} id={"Block"+index} top={block.top} left={block.left}/>
+        <Block key={index} id={"Block"+index} x={block.x} y={block.y}/>
       ))}
         
     </div>

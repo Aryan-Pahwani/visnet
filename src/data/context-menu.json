@@ -1,0 +1,26 @@
+{
+    "container": [
+        {
+        "name": "Add new Block", 
+        "func": "spawnNewBlock", 
+        "enabled": true
+        },
+        {
+            "name": "It's disabled. Just like me.",
+            "func": "function () => {}", 
+            "enabled": false
+        }
+    ],
+    "block": [
+        {
+        "name": "Edit Block", 
+        "func": "spawnNewBlock", 
+        "enabled": true
+        },
+        {
+            "name": "It's disabled. Just like YOU.",
+            "func": "function () => {}", 
+            "enabled": false
+        }
+    ]
+}
